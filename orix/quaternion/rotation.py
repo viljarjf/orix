@@ -20,7 +20,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union, TypeVar
 
 import dask.array as da
 from dask.diagnostics import ProgressBar
@@ -33,6 +33,9 @@ from orix.vector import Vector3d
 
 # Used to round values below 1e-16 to zero
 _FLOAT_EPS = np.finfo(float).eps
+
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Rotation")
 
 
 class Rotation(Quaternion):
@@ -72,7 +75,7 @@ class Rotation(Quaternion):
     neo-Euler representations. See :class:`NeoEuler`.
     """
 
-    def __init__(self, data: Union[np.ndarray, Rotation, list, tuple]):
+    def __init__(self, data: Union[np.ndarray, Rotation, list, tuple]) -> None:
         super().__init__(data)
         self._data = np.concatenate((self.data, np.zeros(self.shape + (1,))), axis=-1)
         if isinstance(data, Rotation):
@@ -108,7 +111,7 @@ class Rotation(Quaternion):
         return 2 * np.nan_to_num(np.arccos(np.abs(self.a)))
 
     @property
-    def antipodal(self) -> Rotation:
+    def antipodal(self: Self) -> Self:
         """Return this and the antipodally equivalent rotations."""
         r = self.__class__(np.stack([self.data, -self.data]))
         r.improper = self.improper
@@ -116,7 +119,7 @@ class Rotation(Quaternion):
 
     def __mul__(
         self, other: Union[Rotation, Quaternion, Vector3d, np.ndarray, int, list]
-    ):
+    ) -> Union[Rotation, Quaternion]:
         if isinstance(other, Rotation):
             q = Quaternion(self) * Quaternion(other)
             r = other.__class__(q)
@@ -141,22 +144,22 @@ class Rotation(Quaternion):
             return r
         return NotImplemented
 
-    def __neg__(self) -> Rotation:
+    def __neg__(self: Self) -> Self:
         r = self.__class__(self.data)
         r.improper = np.logical_not(self.improper)
         return r
 
-    def __getitem__(self, key) -> Rotation:
+    def __getitem__(self: Self, key) -> Self:
         r = super().__getitem__(key)
         r.improper = self.improper[key]
         return r
 
-    def __invert__(self) -> Rotation:
+    def __invert__(self: Self) -> Self:
         r = super().__invert__()
         r.improper = self.improper
         return r
 
-    def __eq__(self, other: Union[Any, Rotation]) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check if Rotation objects are equal by their shape and values."""
         # only return equal if shape, values, and improper arrays are equal
         if (
@@ -228,12 +231,12 @@ class Rotation(Quaternion):
     # Deprication decorator is implemented in Quaternion
     @classmethod
     def from_euler(
-        cls,
+        cls: type[Self],
         euler: Union[np.ndarray, tuple, list],
         direction: str = "lab2crystal",
         degrees: bool = False,
         **kwargs,
-    ) -> Rotation:
+    ) -> Self:
         """Initialize from Euler angle set(s)
         :cite:`rowenhorst2015consistent`.
 

@@ -18,7 +18,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Union, TypeVar
 import warnings
 
 import dask.array as da
@@ -29,10 +29,16 @@ from scipy.spatial.transform import Rotation as SciPyRotation
 
 from orix._util import deprecated_argument
 from orix.base import Object3d
-from orix.vector import AxAngle, Miller, Vector3d
+from orix.vector import AxAngle, Miller, Vector3d, NeoEuler
 
 # Used to round values below 1e-16 to zero
 _FLOAT_EPS = np.finfo(float).eps
+
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Quaternion")
+
+# Represents the `other`-arguments of e.g. `Quaternion.__mul__`
+Other = TypeVar("Other", bound=Union["Quaternion", "Vector3d"])
 
 
 class Quaternion(Object3d):
@@ -136,7 +142,7 @@ class Quaternion(Object3d):
         self.data[..., 3] = value
 
     @property
-    def antipodal(self) -> Quaternion:
+    def antipodal(self: Self) -> Self:
         """Return the quaternions and the antipodal ones."""
         return self.__class__(np.stack([self.data, -self.data]))
 
@@ -148,10 +154,10 @@ class Quaternion(Object3d):
         q = quaternion.from_float_array(self.data).conj()
         return Quaternion(quaternion.as_float_array(q))
 
-    def __invert__(self) -> Quaternion:
+    def __invert__(self: Self) -> Self:
         return self.__class__(self.conj.data / (self.norm**2)[..., np.newaxis])
 
-    def __mul__(self, other: Union[Quaternion, Vector3d]):
+    def __mul__(self, other: Other) -> Other:
         if isinstance(other, Quaternion):
             q1 = quaternion.from_float_array(self.data)
             q2 = quaternion.from_float_array(other.data)
@@ -172,11 +178,11 @@ class Quaternion(Object3d):
                 return other.__class__(v)
         return NotImplemented
 
-    def __neg__(self) -> Quaternion:
+    def __neg__(self: Self) -> Self:
         return self.__class__(-self.data)
 
     @classmethod
-    def triple_cross(cls, q1: Quaternion, q2: Quaternion, q3: Quaternion) -> Quaternion:
+    def triple_cross(cls: type[Self], q1: Quaternion, q2: Quaternion, q3: Quaternion) -> Self:
         """Pointwise cross product of three quaternions.
 
         Parameters
@@ -234,7 +240,7 @@ class Quaternion(Object3d):
         return q
 
     @classmethod
-    def from_neo_euler(cls, neo_euler: "NeoEuler") -> Quaternion:
+    def from_neo_euler(cls: type[Self], neo_euler: NeoEuler) -> Self:
         """Create unit quaternion(s) from a neo-euler (vector)
         representation.
 
@@ -258,11 +264,11 @@ class Quaternion(Object3d):
 
     @classmethod
     def from_axes_angles(
-        cls,
+        cls: type[Self],
         axes: Union[np.ndarray, Vector3d, tuple, list],
         angles: Union[np.ndarray, tuple, list, float],
         degrees: bool = False,
-    ) -> Quaternion:
+    ) -> Self:
         """Initialize from axis-angle pair(s).
 
         Parameters
@@ -301,12 +307,12 @@ class Quaternion(Object3d):
     @classmethod
     @deprecated_argument("convention", "0.9", "0.13", "direction")
     def from_euler(
-        cls,
+        cls: type[Self],
         euler: Union[np.ndarray, tuple, list],
         direction: str = "lab2crystal",
         degrees: bool = False,
         **kwargs,
-    ) -> Quaternion:
+    ) -> Self:
         """Initialize from Euler angle set(s)
         :cite:`rowenhorst2015consistent`.
 
@@ -381,7 +387,7 @@ class Quaternion(Object3d):
         return q
 
     @classmethod
-    def from_matrix(cls, matrix: Union[np.ndarray, tuple, list]) -> Quaternion:
+    def from_matrix(cls: type[Self], matrix: Union[np.ndarray, tuple, list]) -> Self:
         """Create unit quaternions from the orientation matrices
         :cite:`rowenhorst2015consistent`.
 
@@ -431,7 +437,7 @@ class Quaternion(Object3d):
         return q
 
     @classmethod
-    def from_scipy_rotation(cls, rotation: SciPyRotation) -> Quaternion:
+    def from_scipy_rotation(cls: type[Self], rotation: SciPyRotation) -> Self:
         """Initialize from :class:`scipy.spatial.transform.Rotation`.
 
         Parameters
@@ -488,17 +494,17 @@ class Quaternion(Object3d):
 
     @classmethod
     def from_align_vectors(
-        cls,
+        cls: type[Self],
         other: Union[Vector3d, tuple, list],
         initial: Union[Vector3d, tuple, list],
         weights: Optional[np.ndarray] = None,
         return_rmsd: bool = False,
         return_sensitivity: bool = False,
     ) -> Union[
-        Quaternion,
-        Tuple[Quaternion, float],
-        Tuple[Quaternion, np.ndarray],
-        Tuple[Quaternion, float, np.ndarray],
+        Self,
+        tuple[Self, float],
+        tuple[Self, np.ndarray],
+        tuple[Self, float, np.ndarray],
     ]:
         """Initialize an estimated quaternion to optimally align two
         sets of vectors.
@@ -571,7 +577,7 @@ class Quaternion(Object3d):
         return out[0] if len(out) == 1 else tuple(out)
 
     @classmethod
-    def random(cls, shape: Union[int, tuple] = (1,)) -> Quaternion:
+    def random(cls: type[Self], shape: Union[int, tuple] = (1,)) -> Self:
         """Return random quaternions.
 
         Parameters
@@ -598,7 +604,7 @@ class Quaternion(Object3d):
         return q
 
     @classmethod
-    def identity(cls, shape: Union[int, tuple] = (1,)) -> Quaternion:
+    def identity(cls: type[Self], shape: Union[int, tuple] = (1,)) -> Self:
         """Return identity quaternions.
 
         Parameters
@@ -676,7 +682,7 @@ class Quaternion(Object3d):
         dots = np.tensordot(self.data, other.data, axes=(-1, -1))
         return dots
 
-    def mean(self) -> Quaternion:
+    def mean(self: Self) -> Self:
         """Return the mean quaternion with unitary weights.
 
         Returns
@@ -697,11 +703,11 @@ class Quaternion(Object3d):
 
     def outer(
         self,
-        other: Union[Quaternion, Vector3d],
+        other: Other,
         lazy: bool = False,
         chunk_size: int = 20,
         progressbar: bool = True,
-    ) -> Union[Quaternion, Vector3d]:
+    ) -> Other:
         """Return the outer products of the quaternions and the other
         quaternions or vectors.
 

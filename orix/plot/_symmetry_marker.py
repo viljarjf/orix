@@ -63,7 +63,7 @@ class SymmetryMarker:
         """Number of symmetry markers."""
         return self._vector.size
 
-    def __iter__(self) -> Iterator[Vector3d, list, int]:
+    def __iter__(self) -> Iterator[tuple[Vector3d, list, int]]:
         for v, marker, size in zip(self._vector, self._marker, self.size):
             yield v, marker, size
 
