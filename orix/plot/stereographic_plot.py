@@ -19,9 +19,10 @@
 """Stereographic plot inheriting from :class:`~matplotlib.axes.Axes` for
 plotting :class:`~orix.vector.Vector3d`.
 """
+from __future__ import annotations
 
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 from matplotlib import rcParams
 import matplotlib.axes as maxes
@@ -135,7 +136,7 @@ class StereographicPlot(maxes.Axes):
         self.grid(False)
         self.stereographic_grid(rcParams["axes.grid"])
 
-    def format_coord(self, x, y):
+    def format_coord(self, x: Union[float, np.ndarray], y: Union[float, np.ndarray]) -> str:
         if np.sqrt(np.sum(np.square([x, y]))) > 1:
             return ""
         else:
@@ -153,7 +154,7 @@ class StereographicPlot(maxes.Axes):
 
     def plot(
         self,
-        *args: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
+        *args: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
         **kwargs,
     ):
         """Draw straight lines between vectors.
@@ -185,7 +186,7 @@ class StereographicPlot(maxes.Axes):
 
     def scatter(
         self,
-        *args: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
+        *args: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
         **kwargs,
     ):
         """A scatter plot of vectors.
@@ -233,8 +234,8 @@ class StereographicPlot(maxes.Axes):
 
     def text(
         self,
-        *args: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
-        offset: Optional[Tuple[float, float]] = None,
+        *args: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
+        offset: Optional[tuple[float, float]] = None,
         **kwargs,
     ):
         """Add text to the axes.
@@ -304,11 +305,11 @@ class StereographicPlot(maxes.Axes):
         return {"upper": -1, "lower": 1}[self.hemisphere]
 
     @property
-    def _projection(self):
+    def _projection(self) -> StereographicProjection:
         return StereographicProjection(self.pole)
 
     @property
-    def _inverse_projection(self):
+    def _inverse_projection(self) -> InverseStereographicProjection:
         return InverseStereographicProjection(self.pole)
 
     def pole_density_function(
@@ -378,7 +379,7 @@ class StereographicPlot(maxes.Axes):
 
     def draw_circle(
         self,
-        *args: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
+        *args: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
         opening_angle: Union[float, np.ndarray] = np.pi / 2,
         steps: int = 100,
         reproject: bool = False,
@@ -712,7 +713,7 @@ class StereographicPlot(maxes.Axes):
         self.add_collection(lines_collection)
 
     @staticmethod
-    def _has_collection(label, collections):
+    def _has_collection(label, collections) -> tuple[bool, int]:
         labels = [c.get_label() for c in collections]
         for i in range(len(labels)):
             if label == labels[i]:
@@ -776,12 +777,12 @@ class StereographicPlot(maxes.Axes):
 
     def _prepare_to_call_inherited_method(
         self,
-        args: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
+        args: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
         kwargs: dict,
         new_kwargs: Optional[dict] = None,
         sort: bool = False,
-        offset: Tuple[float, float] = None,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
+        offset: tuple[float, float] = None,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict]:
         """Prepare arguments and keyword arguments passed to methods in
         :class:`StereographicPlot` inherited from
         :class:`matplotlib.axes.Axes`.
@@ -820,10 +821,10 @@ class StereographicPlot(maxes.Axes):
 
     def _pretransform_input(
         self,
-        values: Union[Vector3d, Tuple[float, float], Tuple[np.ndarray, np.ndarray]],
+        values: Union[Vector3d, tuple[float, float], tuple[np.ndarray, np.ndarray]],
         sort: bool = False,
-        offset: Optional[Tuple[float, float]] = None,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        offset: Optional[tuple[float, float]] = None,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return arrays of (X, Y) from input data.
 
         Parameters
@@ -890,7 +891,7 @@ mprojections.register_projection(StereographicPlot)
 
 
 def _get_array_of_values(
-    value: Union[str, float, List[str], List[float]], visible: np.ndarray
+    value: Union[str, float, list[str], list[float]], visible: np.ndarray
 ) -> np.ndarray:
     """Return a usable array of ``value`` with the correct size
     even though ``value`` doesn't have as many elements as

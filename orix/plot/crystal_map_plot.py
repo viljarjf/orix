@@ -15,19 +15,21 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with orix.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import annotations
 
-from typing import List, Optional
+from typing import Optional
 
 from matplotlib.axes import Axes
 import matplotlib.colorbar as mbar
 from matplotlib.image import AxesImage
 import matplotlib.patches as mpatches
 from matplotlib.projections import register_projection
-import matplotlib.pyplot as plt
 from matplotlib_scalebar.dimension import _Dimension
 from matplotlib_scalebar.scalebar import ScaleBar
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
+
+from orix.crystal_map import CrystalMap
 
 
 class CrystalMapPlot(Axes):
@@ -41,7 +43,7 @@ class CrystalMapPlot(Axes):
 
     def plot_map(
         self,
-        crystal_map: "orix.crystal_map.CrystalMap",
+        crystal_map: CrystalMap,
         value: Optional[np.ndarray] = None,
         scalebar: bool = True,
         scalebar_properties: Optional[dict] = None,
@@ -187,7 +189,7 @@ class CrystalMapPlot(Axes):
         return im
 
     def add_scalebar(
-        self, crystal_map: "orix.crystal_map.CrystalMap", **kwargs
+        self, crystal_map: CrystalMap, **kwargs
     ) -> ScaleBar:
         """Add a scalebar to the axes instance and return it.
 
@@ -253,7 +255,7 @@ class CrystalMapPlot(Axes):
 
         return bar
 
-    def add_overlay(self, crystal_map: "orix.crystal_map.CrystalMap", item: str):
+    def add_overlay(self, crystal_map: CrystalMap, item: str):
         """Use a crystal map property as gray scale values of a phase
         map.
 
@@ -380,7 +382,7 @@ class CrystalMapPlot(Axes):
             right = 1
         self.figure.subplots_adjust(top=1, bottom=0, right=right, left=0)
 
-    def _add_legend(self, patches: List[mpatches.Patch], **kwargs):
+    def _add_legend(self, patches: list[mpatches.Patch], **kwargs):
         """Add a legend to the axes object.
 
         Parameters
@@ -400,7 +402,7 @@ class CrystalMapPlot(Axes):
         self.legend(handles=patches, **kwargs)
 
     def _override_status_bar(
-        self, image: AxesImage, crystal_map: "orix.crystal_map.CrystalMap"
+        self, image: AxesImage, crystal_map: CrystalMap
     ) -> AxesImage:
         """Display coordinates, a property value (if scalar values are
         plotted), and Euler angles (in radians) per data point in the

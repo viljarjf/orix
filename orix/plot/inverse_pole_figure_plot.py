@@ -21,8 +21,9 @@
 :class:`~orix.vector.Vector3d`, typically parallel to sample directions,
 rotated by orientations.
 """
+from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import matplotlib.axes as maxes
 from matplotlib.figure import Figure
@@ -172,7 +173,7 @@ class InversePoleFigurePlot(StereographicPlot):
 
     def scatter(
         self,
-        *args: Union[Tuple[np.ndarray, np.ndarray], Orientation, Vector3d],
+        *args: Union[tuple[np.ndarray, np.ndarray], Orientation, Vector3d],
         **kwargs: Any,
     ) -> None:
         """A scatter plot of sample directions rotated by orientations,
@@ -268,7 +269,7 @@ class InversePoleFigurePlot(StereographicPlot):
                 maxes.Axes.text(self, xi, yi, s=label, va=va, ha=ha, **text_kw)
 
     def _pretransform_input_ipf(
-        self, values: Union[Tuple[np.ndarray, np.ndarray], Orientation, Vector3d]
+        self, values: Union[tuple[np.ndarray, np.ndarray], Orientation, Vector3d]
     ) -> Vector3d:
         """Return unit vectors within the inverse pole figure from input
         data.
@@ -351,8 +352,8 @@ def _setup_inverse_pole_figure_plot(
     symmetry: Symmetry,
     direction: Optional[Vector3d] = None,
     hemisphere: Optional[str] = None,
-    figure_kwargs: Optional[Dict] = None,
-) -> Tuple[Figure, maxes.Axes]:
+    figure_kwargs: Optional[dict] = None,
+) -> tuple[Figure, maxes.Axes]:
     """Set up an inverse pole figure plot.
 
     Parameters
@@ -453,7 +454,7 @@ def _get_ipf_title(direction: Vector3d) -> str:
         return np.array_str(direction.data.squeeze()).strip("[]")
 
 
-def _get_ipf_axes_labels(vertices: Vector3d, symmetry: Symmetry) -> List[str]:
+def _get_ipf_axes_labels(vertices: Vector3d, symmetry: Symmetry) -> list[str]:
     r"""Get nicely formatted crystal direction strings from vector
     coordinates.
 

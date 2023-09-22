@@ -23,7 +23,7 @@ Meant to be used indirectly in
 :func:`~orix.plot.StereographicPlot.symmetry_marker`.
 """
 
-from typing import Union
+from typing import Union, Iterator
 
 import matplotlib.path as mpath
 import matplotlib.transforms as mtransforms
@@ -63,7 +63,7 @@ class SymmetryMarker:
         """Number of symmetry markers."""
         return self._vector.size
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Vector3d, list, int]:
         for v, marker, size in zip(self._vector, self._marker, self.size):
             yield v, marker, size
 
@@ -82,7 +82,7 @@ class TwoFoldMarker(SymmetryMarker):
         return self._size / np.sqrt(radial)
 
     @property
-    def _marker(self):
+    def _marker(self) -> list:
         # Make an ellipse path (https://matplotlib.org/stable/api/path_api.html)
         circle = mpath.Path.circle()
         verts = np.copy(circle.vertices)  # Paths considered immutable
@@ -102,7 +102,7 @@ class ThreeFoldMarker(SymmetryMarker):
     fold = 3
 
     @property
-    def _marker(self):
+    def _marker(self) -> list:
         return [(3, 0, angle) for angle in self.angle_deg]
 
 
@@ -112,7 +112,7 @@ class FourFoldMarker(SymmetryMarker):
     fold = 4
 
     @property
-    def _marker(self):
+    def _marker(self) -> list:
         return ["D"] * self.n
 
 
@@ -122,5 +122,5 @@ class SixFoldMarker(SymmetryMarker):
     fold = 6
 
     @property
-    def _marker(self):
+    def _marker(self) -> list:
         return ["h"] * self.n
