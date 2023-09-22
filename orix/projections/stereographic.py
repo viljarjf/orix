@@ -18,7 +18,9 @@
 
 """Stereographic projection of 3D vectors."""
 
-from typing import Tuple, Union
+from __future__ import annotations
+
+from typing import Union
 
 import numpy as np
 
@@ -47,7 +49,7 @@ class StereographicProjection:
         self.pole = pole
         self.region = SphericalRegion([0, 0, pole * -1])
 
-    def vector2xy(self, v: Vector3d) -> Tuple[np.ndarray, np.ndarray]:
+    def vector2xy(self, v: Vector3d) -> tuple[np.ndarray, np.ndarray]:
         r"""Return stereographic coordinates (X, Y) of 3D unit vectors.
 
         Parameters
@@ -87,7 +89,7 @@ class StereographicProjection:
         azimuth: Union[np.ndarray, list, tuple, float],
         polar: Union[np.ndarray, list, tuple, float],
         degrees: bool = False,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Return stereographic coordinates (X, Y) from 3D unit vectors
         created from spherical coordinates, azimuth :math:`\phi` and
         polar :math:`\theta`, defined as in the ISO 31-11 standard
@@ -126,7 +128,7 @@ class StereographicProjection:
     @staticmethod
     def vector2xy_split(
         v: Vector3d,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Return two sets of stereographic coordinates (X, Y) from 3D
         unit vectors: one set for vectors in the upper hemisphere, and
         one for the lower.
@@ -164,7 +166,7 @@ class StereographicProjection:
         azimuth: Union[np.ndarray, list, tuple, float],
         polar: Union[np.ndarray, list, tuple, float],
         degrees: bool = False,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         r"""Return two sets of stereographic coordinates (X, Y) from 3D
         unit vectors created from spherical coordinates, azimuth
         :math:`\phi` and polar :math:`\theta`, defined as in the
@@ -204,7 +206,7 @@ class StereographicProjection:
         return self.vector2xy_split(v)
 
     @property
-    def inverse(self):
+    def inverse(self) -> InverseStereographicProjection:
         """Return the corresponding inverse projection,
         :class:`InverseStereographicProjection`, with the same
         projection pole.
@@ -212,7 +214,7 @@ class StereographicProjection:
         return InverseStereographicProjection(pole=self.pole)
 
 
-def _vector2xy(v: Vector3d, pole: int) -> Tuple[np.ndarray, np.ndarray]:
+def _vector2xy(v: Vector3d, pole: int) -> tuple[np.ndarray, np.ndarray]:
     """Return stereographic coordinates (X, Y) of 3D unit vectors.
 
     (X, Y) is both zero for vectors with z equal to the projection pole.
@@ -312,7 +314,7 @@ class InverseStereographicProjection:
         x: Union[float, np.ndarray],
         y: Union[float, np.ndarray],
         degrees: bool = False,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray]:
         r"""Return spherical coordinates, azimuth :math:`phi` and
         polar :math:`theta`, defined as in the ISO 31-11 standard
         :cite:`weisstein2005spherical`, from stereographic coordinates
