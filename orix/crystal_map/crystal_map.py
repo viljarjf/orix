@@ -15,9 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with orix.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import copy
-from typing import Optional, Tuple, Union
+from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -213,7 +214,7 @@ class CrystalMap:
         prop: Optional[dict] = None,
         scan_unit: Optional[str] = "px",
         is_in_data: Optional[np.ndarray] = None,
-    ):
+    ) -> None:
         # Set rotations
         if not isinstance(rotations, Rotation):
             raise ValueError(
@@ -566,22 +567,22 @@ class CrystalMap:
         return self._prop
 
     @property
-    def _coordinates(self) -> dict:
+    def _coordinates(self) -> dict[str, np.ndarray]:
         """Return the coordinates of points in the data."""
         return {"y": self.y, "x": self.x}
 
     @property
-    def _all_coordinates(self) -> dict:
+    def _all_coordinates(self) -> dict[str, np.ndarray]:
         """Return the coordinates of all points."""
         return {"y": self._y, "x": self._x}
 
     @property
-    def _step_sizes(self) -> dict:
+    def _step_sizes(self) -> dict[str, float]:
         """Return the step sizes of dimensions in the data."""
         return {"y": self.dy, "x": self.dx}
 
     @property
-    def _coordinate_axes(self) -> dict:
+    def _coordinate_axes(self) -> dict[int, str]:
         """Return which data axis corresponds to which coordinate."""
         present_coordinates = [k for k, v in self._coordinates.items() if v is not None]
         return {i: coord for i, coord in zip(range(self.ndim), present_coordinates)}
@@ -607,7 +608,7 @@ class CrystalMap:
         else:
             return object.__setattr__(self, name, value)
 
-    def __getitem__(self, key: Union[str, slice, tuple, int, np.ndarray]):
+    def __getitem__(self, key: Union[str, slice, tuple, int, np.ndarray]) -> CrystalMap:
         """Get a masked copy of the CrystalMap instance.
 
         See the docstring of ``__init__()`` for examples.
@@ -749,7 +750,7 @@ class CrystalMap:
 
         return representation
 
-    def deepcopy(self) -> "CrystalMap":
+    def deepcopy(self) -> CrystalMap:
         """Return a deep copy using :func:`copy.deepcopy` function."""
         return copy.deepcopy(self)
 
@@ -758,7 +759,7 @@ class CrystalMap:
         cls,
         shape: Union[None, int, tuple] = None,
         step_sizes: Union[None, int, tuple] = None,
-    ) -> "CrystalMap":
+    ) -> CrystalMap:
         """Return a crystal map of a given 2D shape and step sizes with
         identity rotations.
 
@@ -1070,7 +1071,9 @@ class CrystalMap:
             step_size = unique_sorted[1] - unique_sorted[0]
         return step_size
 
-    def _data_slices_from_coordinates(self, only_is_in_data: bool = True) -> tuple:
+    def _data_slices_from_coordinates(
+        self, only_is_in_data: bool = True
+    ) -> tuple[slice, ...]:
         """Return a tuple of slices defining the current data extent in
         all directions.
 
@@ -1101,7 +1104,9 @@ class CrystalMap:
 
         return tuple(slices)
 
-    def _data_shape_from_coordinates(self, only_is_in_data: bool = True) -> tuple:
+    def _data_shape_from_coordinates(
+        self, only_is_in_data: bool = True
+    ) -> tuple[int, ...]:
         """Return data shape based upon coordinate arrays.
 
         Parameters
@@ -1123,7 +1128,7 @@ class CrystalMap:
 
 def create_coordinate_arrays(
     shape: Optional[tuple] = None, step_sizes: Optional[tuple] = None
-) -> Tuple[dict, int]:
+) -> tuple[dict[str, np.ndarray], int]:
     """Create flattened coordinate arrays from a given map shape and
     step sizes, suitable for initializing a
     :class:`~orix.crystal_map.CrystalMap`. Arrays for 1D or 2D maps can

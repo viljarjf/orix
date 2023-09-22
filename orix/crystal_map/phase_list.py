@@ -18,25 +18,21 @@
 
 from __future__ import annotations
 
-from collections import OrderedDict
 import copy
-from itertools import islice
 import os
-from typing import Dict, List, Optional, Tuple, Union
 import warnings
+from collections import OrderedDict
+from itertools import islice
+from typing import Any, Iterator, Optional, Union
 
+import matplotlib.colors as mcolors
+import numpy as np
 from diffpy.structure import Structure
 from diffpy.structure.parsers import p_cif
 from diffpy.structure.spacegroups import GetSpaceGroup, SpaceGroup
-import matplotlib.colors as mcolors
-import numpy as np
 
-from orix.quaternion.symmetry import (
-    Symmetry,
-    _groups,
-    get_point_group,
-    point_group_aliases,
-)
+from orix.quaternion.symmetry import (Symmetry, _groups, get_point_group,
+                                      point_group_aliases)
 from orix.vector import Miller, Vector3d
 
 # All named Matplotlib colors (tableau and xkcd already lower case hex)
@@ -101,7 +97,7 @@ class Phase:
         point_group: Union[int, str, Symmetry, None] = None,
         structure: Optional[Structure] = None,
         color: Optional[str] = None,
-    ):
+    ) -> None:
         """Create a phase."""
         self.structure = structure if structure is not None else Structure()
         if name is not None:
@@ -159,7 +155,7 @@ class Phase:
         self.structure.title = str(value)
 
     @property
-    def color(self):
+    def color(self) -> str:
         """Return or set the name of phase color.
 
         Parameters
@@ -180,7 +176,7 @@ class Phase:
                 break
 
     @property
-    def color_rgb(self) -> tuple:
+    def color_rgb(self) -> tuple[int, int, int]:
         """Return the phase color as RGB tuple."""
         return mcolors.to_rgb(self.color)
 
@@ -335,7 +331,7 @@ class Phase:
         """
         parser = p_cif.P_cif()
         name = os.path.splitext(os.path.split(filename)[1])[0]
-        structure = parser.parseFile(filename)
+        structure: Structure = parser.parseFile(filename)
         lattice = structure.lattice
         new_base = _new_structure_matrix_from_alignment(lattice.base, x="a", z="c*")
         lattice.setLatBase(new_base)
@@ -432,16 +428,16 @@ class PhaseList:
 
     def __init__(
         self,
-        phases: Union[Phase, List[Phase], Dict[Phase], None] = None,
-        names: Union[str, List[str], None] = None,
-        space_groups: Union[int, SpaceGroup, List[Union[int, SpaceGroup]], None] = None,
+        phases: Union[Phase, list[Phase], dict[Any, Phase], None] = None,
+        names: Union[str, list[str], None] = None,
+        space_groups: Union[int, SpaceGroup, list[Union[int, SpaceGroup]], None] = None,
         point_groups: Union[
-            str, int, Symmetry, List[Union[str, int, Symmetry]], None
+            str, int, Symmetry, list[Union[str, int, Symmetry]], None
         ] = None,
-        colors: Union[str, List[str], None] = None,
-        ids: Union[int, List[int], np.ndarray, None] = None,
-        structures: Union[Structure, List[Structure], None] = None,
-    ):
+        colors: Union[str, list[str], None] = None,
+        ids: Union[int, list[int], np.ndarray, None] = None,
+        structures: Union[Structure, list[Structure], None] = None,
+    ) -> None:
         """Create a new phase list."""
         d = {}
         if isinstance(phases, list):
@@ -555,27 +551,27 @@ class PhaseList:
         self._dict = OrderedDict(sorted(d.items()))
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """Return the phases' names."""
         return [phase.name for _, phase in self]
 
     @property
-    def space_groups(self) -> List[SpaceGroup]:
+    def space_groups(self) -> list[SpaceGroup]:
         """Return the phases' space groups."""
         return [phase.space_group for _, phase in self]
 
     @property
-    def point_groups(self) -> List[Symmetry]:
+    def point_groups(self) -> list[Symmetry]:
         """Return the phases' point groups."""
         return [phase.point_group for _, phase in self]
 
     @property
-    def colors(self) -> List[str]:
+    def colors(self) -> list[str]:
         """Return the phases' colors."""
         return [phase.color for _, phase in self]
 
     @property
-    def colors_rgb(self) -> List[tuple]:
+    def colors_rgb(self) -> list[tuple]:
         """Return the phases' RGB color values."""
         return [phase.color_rgb for _, phase in self]
 
@@ -585,12 +581,12 @@ class PhaseList:
         return len(self._dict.items())
 
     @property
-    def ids(self) -> List[int]:
+    def ids(self) -> list[int]:
         """Return the unique phase IDs in the list of phases."""
         return list(self._dict.keys())
 
     @property
-    def structures(self) -> List[Structure]:
+    def structures(self) -> list[Structure]:
         """Return the phases' structures."""
         return [phase.structure for _, phase in self]
 
@@ -664,7 +660,7 @@ class PhaseList:
         else:
             raise TypeError(f"{key} is an invalid phase ID or name.")
 
-    def __iter__(self) -> Tuple[int, Phase]:
+    def __iter__(self) -> Iterator[tuple[int, Phase]]:
         """Return a tuple with phase ID and Phase object, in that order."""
         for phase_id, phase in self._dict.items():
             yield phase_id, phase
@@ -754,7 +750,7 @@ class PhaseList:
                 return phase_id
         raise KeyError(f"'{name}' is not among the phase names {self.names}.")
 
-    def add(self, value: Union[Phase, List[Phase], PhaseList]):
+    def add(self, value: Union[Phase, list[Phase], PhaseList]):
         """Add phases to the end of a phase list in-place, incrementing
         the phase IDs.
 

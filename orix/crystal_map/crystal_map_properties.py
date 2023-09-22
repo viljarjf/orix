@@ -15,8 +15,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with orix.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 class CrystalMapProperties(dict):
@@ -35,7 +37,12 @@ class CrystalMapProperties(dict):
         as the data.
     """
 
-    def __init__(self, dictionary, id, is_in_data=None):
+    def __init__(
+        self,
+        dictionary: dict[str, np.ndarray],
+        id: np.ndarray,
+        is_in_data: np.ndarray = None,
+    ) -> None:
         """Create a `CrystalMapProperties` object.
 
         Parameters
@@ -58,7 +65,7 @@ class CrystalMapProperties(dict):
         else:
             self.is_in_data = is_in_data
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: ArrayLike) -> None:
         """Add an array to or update an existing array in the
         dictionary.
 
@@ -86,7 +93,7 @@ class CrystalMapProperties(dict):
         array[self.is_in_data, ...] = value
         super().__setitem__(key, array)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> np.ndarray:
         """Return a dictionary entry, ensuring that only points in the data
         are returned.
         """
