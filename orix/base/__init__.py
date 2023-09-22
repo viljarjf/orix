@@ -25,7 +25,7 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TypeVar, Iterable
+from typing import Iterable, Optional, TypeVar, Union
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -165,11 +165,7 @@ class Object3d:
 
     def unique(
         self: Self, return_index: bool = False, return_inverse: bool = False
-    ) -> Union[
-        tuple[Self, np.ndarray, np.ndarray],
-        tuple[Self, np.ndarray],
-        Self,
-    ]:
+    ) -> Union[tuple[Self, np.ndarray, np.ndarray], tuple[Self, np.ndarray], Self,]:
         """Return a new object containing only this object's unique
         entries.
 
@@ -292,7 +288,10 @@ class Object3d:
         return self.__class__(self.data.transpose(*axes + (-1,)))
 
     def get_random_sample(
-        self: Self, size: Optional[int] = 1, replace: bool = False, shuffle: bool = False
+        self: Self,
+        size: Optional[int] = 1,
+        replace: bool = False,
+        shuffle: bool = False,
     ) -> Self:
         """Return a random sample of a given size in a flattened
         instance.
