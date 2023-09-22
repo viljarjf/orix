@@ -25,11 +25,16 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional, Tuple, Union
+from typing import Optional, Union, TypeVar, Iterable
 
 import numpy as np
+from numpy.typing import ArrayLike
 
 __all__ = ["DimensionError", "Object3d"]
+
+
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Object3d")
 
 
 class DimensionError(Exception):
@@ -64,14 +69,14 @@ class Object3d:
         Object data.
     """
 
-    dim = None
+    dim: int = None
     """Return the number of dimensions for this object."""  # pragma: no cover
 
-    _data = None
+    _data: np.ndarray = None
 
     __array_ufunc__ = None
 
-    def __init__(self, data=None):
+    def __init__(self, data: Union[Self, ArrayLike, None] = None) -> None:
         if isinstance(data, Object3d):
             self._data = data.data
         else:
@@ -101,7 +106,7 @@ class Object3d:
         data = np.array_str(self.data, precision=4, suppress_small=True)
         return "\n".join([name + " " + shape, data])
 
-    def __getitem__(self, key):
+    def __getitem__(self: Self, key) -> Self:
         """Return a slice of the object."""
         data = np.atleast_2d(self.data[key])
         obj = self.__class__(data)
@@ -112,7 +117,7 @@ class Object3d:
         self.data[key] = value.data
 
     @classmethod
-    def empty(cls):
+    def empty(cls: type[Self]) -> Self:
         """Return an empty object with the appropriate dimensions."""
         return cls(np.zeros((0, cls.dim)))
 
@@ -136,7 +141,7 @@ class Object3d:
         return int(np.prod(self.shape))
 
     @classmethod
-    def stack(cls, sequence: Any):
+    def stack(cls: type[Self], sequence: Iterable[Self]) -> Self:
         """Return a stacked object from the sequence.
 
         Parameters
@@ -151,7 +156,7 @@ class Object3d:
         obj._data = stack
         return obj
 
-    def flatten(self):
+    def flatten(self: Self) -> Self:
         """Return a new object with the same data in a single column."""
         obj = self.__class__(self.data.T.reshape(self.dim, -1).T)
         real_dim = self._data.shape[-1]
@@ -159,11 +164,11 @@ class Object3d:
         return obj
 
     def unique(
-        self, return_index: bool = False, return_inverse: bool = False
+        self: Self, return_index: bool = False, return_inverse: bool = False
     ) -> Union[
-        Tuple[Object3d, np.ndarray, np.ndarray],
-        Tuple[Object3d, np.ndarray],
-        Object3d,
+        tuple[Self, np.ndarray, np.ndarray],
+        tuple[Self, np.ndarray],
+        Self,
     ]:
         """Return a new object containing only this object's unique
         entries.
@@ -212,13 +217,13 @@ class Object3d:
         return np.sqrt(np.sum(np.square(self.data), axis=-1))
 
     @property
-    def unit(self) -> Object3d:
+    def unit(self: Self) -> Self:
         """Return the unit object."""
         with np.errstate(divide="ignore", invalid="ignore"):
             obj = self.__class__(np.nan_to_num(self.data / self.norm[..., np.newaxis]))
             return obj
 
-    def squeeze(self) -> Object3d:
+    def squeeze(self: Self) -> Self:
         """Return a new object with length one dimensions removed.
 
         Returns
@@ -230,7 +235,7 @@ class Object3d:
         obj._data = np.atleast_2d(np.squeeze(self._data))
         return obj
 
-    def reshape(self, *shape: int) -> Object3d:
+    def reshape(self: Self, *shape: int) -> Self:
         """Return a new object containing the same data with a new
         shape.
 
@@ -248,7 +253,7 @@ class Object3d:
         obj._data = self._data.reshape(*shape, -1)
         return obj
 
-    def transpose(self, *axes: Optional[int]) -> Object3d:
+    def transpose(self: Self, *axes: Optional[int]) -> Self:
         """Return a new object containing the same data transposed.
 
         If :attr:`ndim` is originally 2, then order may be undefined. In
@@ -287,8 +292,8 @@ class Object3d:
         return self.__class__(self.data.transpose(*axes + (-1,)))
 
     def get_random_sample(
-        self, size: Optional[int] = 1, replace: bool = False, shuffle: bool = False
-    ):
+        self: Self, size: Optional[int] = 1, replace: bool = False, shuffle: bool = False
+    ) -> Self:
         """Return a random sample of a given size in a flattened
         instance.
 
