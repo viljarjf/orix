@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from itertools import product as iproduct
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union, TypeVar
 import warnings
 
 import dask.array as da
@@ -36,6 +36,9 @@ from orix.quaternion.orientation_region import OrientationRegion
 from orix.quaternion.rotation import Rotation
 from orix.quaternion.symmetry import C1, Symmetry, _get_unique_symmetry_elements
 from orix.vector import AxAngle, Miller, NeoEuler, Vector3d
+
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Orientation")
 
 
 class Orientation(Misorientation):
@@ -74,18 +77,18 @@ class Orientation(Misorientation):
         self._symmetry = (C1, value)
 
     @property
-    def unit(self) -> Orientation:
+    def unit(self: Self) -> Self:
         """Unit orientations."""
         o = super().unit
         o.symmetry = self.symmetry
         return o
 
-    def __invert__(self) -> Orientation:
+    def __invert__(self: Self) -> Self:
         o = super().__invert__()
         o.symmetry = self.symmetry
         return o
 
-    def __neg__(self) -> Orientation:
+    def __neg__(self: Self) -> Self:
         o = super().__neg__()
         o.symmetry = self.symmetry
         return o
@@ -106,13 +109,13 @@ class Orientation(Misorientation):
     # TODO: Remove use of **kwargs in 1.0
     @classmethod
     def from_euler(
-        cls,
+        cls: type[Self],
         euler: np.ndarray,
         symmetry: Optional[Symmetry] = None,
         direction: str = "lab2crystal",
         degrees: bool = False,
         **kwargs,
-    ) -> Orientation:
+    ) -> Self:
         """Initialize from an array of Euler angles.
 
         Parameters
@@ -143,17 +146,17 @@ class Orientation(Misorientation):
 
     @classmethod
     def from_align_vectors(
-        cls,
+        cls: type[Self],
         other: Miller,
         initial: Vector3d,
         weights: Optional[np.ndarray] = None,
         return_rmsd: bool = False,
         return_sensitivity: bool = False,
     ) -> Union[
-        Orientation,
-        Tuple[Orientation, float],
-        Tuple[Orientation, np.ndarray],
-        Tuple[Orientation, float, np.ndarray],
+        Self,
+        tuple[Self, float],
+        tuple[Self, np.ndarray],
+        tuple[Self, float, np.ndarray],
     ]:
         """Return an estimated orientation to optimally align vectors in
         the crystal and sample reference frames.
@@ -233,8 +236,8 @@ class Orientation(Misorientation):
 
     @classmethod
     def from_matrix(
-        cls, matrix: np.ndarray, symmetry: Optional[Symmetry] = None
-    ) -> Orientation:
+        cls: type[Self], matrix: np.ndarray, symmetry: Optional[Symmetry] = None
+    ) -> Self:
         """Return orientation(s) from orientation matrices
         :cite:`rowenhorst2015consistent`.
 
@@ -258,8 +261,8 @@ class Orientation(Misorientation):
 
     @classmethod
     def from_neo_euler(
-        cls, neo_euler: NeoEuler, symmetry: Optional[Symmetry] = None
-    ) -> Orientation:
+        cls: type[Self], neo_euler: NeoEuler, symmetry: Optional[Symmetry] = None
+    ) -> Self:
         """Return orientation(s) from a neo-euler (vector)
         representation.
 
@@ -283,12 +286,12 @@ class Orientation(Misorientation):
 
     @classmethod
     def from_axes_angles(
-        cls,
+        cls: type[Self],
         axes: Union[np.ndarray, Vector3d, tuple, list],
         angles: Union[np.ndarray, tuple, list, float],
         symmetry: Optional[Symmetry] = None,
         degrees: bool = False,
-    ) -> Orientation:
+    ) -> Self:
         """Initialize from axis-angle pair(s).
 
         Parameters
@@ -327,8 +330,8 @@ class Orientation(Misorientation):
 
     @classmethod
     def from_scipy_rotation(
-        cls, rotation: SciPyRotation, symmetry: Optional[Symmetry] = None
-    ) -> Orientation:
+        cls: type[Self], rotation: SciPyRotation, symmetry: Optional[Symmetry] = None
+    ) -> Self:
         """Return orientation(s) from
         :class:`scipy.spatial.transform.Rotation`.
 
@@ -719,7 +722,7 @@ class Orientation(Misorientation):
         self,
         projection: str = "axangle",
         figure: Optional[plt.Figure] = None,
-        position: Union[int, Tuple[int], SubplotSpec] = None,
+        position: Union[int, tuple[int], SubplotSpec] = None,
         return_figure: bool = False,
         wireframe_kwargs: Optional[dict] = None,
         size: Optional[int] = None,

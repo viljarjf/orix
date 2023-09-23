@@ -37,7 +37,7 @@ Rotations or orientations can be inside or outside of an orientation region.
 from __future__ import annotations
 
 import itertools
-from typing import Tuple
+from typing import TypeVar
 
 import numpy as np
 
@@ -48,8 +48,10 @@ from orix.vector import AxAngle, Rodrigues
 
 _EPSILON = 1e-9  # small number to avoid round off problems
 
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="OrientationRegion")
 
-def _get_large_cell_normals(s1, s2):
+def _get_large_cell_normals(s1: Symmetry, s2: Symmetry) -> Rotation:
     dp = get_distinguished_points(s1, s2)
     normals = Rodrigues.zero(dp.shape + (2,))
     planes1 = dp.axis * np.tan(dp.angle / 4)
@@ -75,7 +77,7 @@ def _get_large_cell_normals(s1, s2):
     return normals
 
 
-def get_proper_groups(Gl: Symmetry, Gr: Symmetry) -> Tuple[Symmetry, Symmetry]:
+def get_proper_groups(Gl: Symmetry, Gr: Symmetry) -> tuple[Symmetry, Symmetry]:
     """Return the appropriate groups for the asymmetric domain
     calculation.
 
@@ -127,7 +129,7 @@ class OrientationRegion(Rotation):
     """
 
     @classmethod
-    def from_symmetry(cls, s1: Symmetry, s2: Symmetry = C1) -> OrientationRegion:
+    def from_symmetry(cls: type[Self], s1: Symmetry, s2: Symmetry = C1) -> Self:
         """The set of unique (mis)orientations of a symmetrical object.
 
         Parameters
@@ -174,7 +176,7 @@ class OrientationRegion(Rotation):
         surface = np.any(np.isclose(rot.dot_outer(self), 0), axis=1)
         return rot[surface]
 
-    def faces(self) -> list:
+    def faces(self) -> list[Rotation]:
         normals = Rotation(self)
         vertices = self.vertices()
         faces = []
@@ -183,7 +185,7 @@ class OrientationRegion(Rotation):
         faces = [f for f in faces if f.size > 2]
         return faces
 
-    def __gt__(self, other: OrientationRegion) -> np.ndarray:
+    def __gt__(self: Self, other: Self) -> np.ndarray:
         """Overridden greater than method. Applying this to an
         Orientation will return only those orientations that lie within
         the OrientationRegion.

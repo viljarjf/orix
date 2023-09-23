@@ -29,7 +29,7 @@ from scipy.spatial.transform import Rotation as SciPyRotation
 from scipy.special import hyp0f1
 
 from orix.quaternion import Quaternion
-from orix.vector import Vector3d
+from orix.vector import Vector3d, NeoEuler
 
 # Used to round values below 1e-16 to zero
 _FLOAT_EPS = np.finfo(float).eps
@@ -173,7 +173,7 @@ class Rotation(Quaternion):
             return False
 
     @classmethod
-    def from_neo_euler(cls, neo_euler: "NeoEuler") -> Rotation:
+    def from_neo_euler(cls: type[Self], neo_euler: NeoEuler) -> Self:
         """Create rotations(s) from a neo-euler (vector) representation.
 
         Parameters
@@ -190,11 +190,11 @@ class Rotation(Quaternion):
 
     @classmethod
     def from_axes_angles(
-        cls,
+        cls: type[Self],
         axes: Union[np.ndarray, Vector3d, tuple, list],
         angles: Union[np.ndarray, tuple, list, float],
         degrees: bool = False,
-    ) -> Rotation:
+    ) -> Self:
         """Initialize from axis-angle pair(s).
 
         Parameters
@@ -264,7 +264,7 @@ class Rotation(Quaternion):
         return r
 
     @classmethod
-    def from_matrix(cls, matrix: Union[np.ndarray, tuple, list]) -> Rotation:
+    def from_matrix(cls: type[Self], matrix: Union[np.ndarray, tuple, list]) -> Self:
         """Return rotations from the orientation matrices
         :cite:`rowenhorst2015consistent`.
 
@@ -291,7 +291,7 @@ class Rotation(Quaternion):
         return super().from_matrix(matrix)
 
     @classmethod
-    def from_scipy_rotation(cls, rotation: SciPyRotation) -> Rotation:
+    def from_scipy_rotation(cls: type[Self], rotation: SciPyRotation) -> Self:
         """Return rotations(s) from
         :class:`scipy.spatial.transform.Rotation`.
 
@@ -337,17 +337,17 @@ class Rotation(Quaternion):
 
     @classmethod
     def from_align_vectors(
-        cls,
+        cls: type[Self],
         other: Union[Vector3d, tuple, list],
         initial: Union[Vector3d, tuple, list],
         weights: Optional[np.ndarray] = None,
         return_rmsd: bool = False,
         return_sensitivity: bool = False,
     ) -> Union[
-        Quaternion,
-        Tuple[Quaternion, float],
-        Tuple[Quaternion, np.ndarray],
-        Tuple[Quaternion, float, np.ndarray],
+        Self,
+        tuple[Self, float],
+        tuple[Self, np.ndarray],
+        tuple[Self, float, np.ndarray],
     ]:
         """Return an estimated rotation to optimally align two sets of
         vectors.
@@ -406,7 +406,7 @@ class Rotation(Quaternion):
         )
 
     @classmethod
-    def random(cls, shape: Union[int, tuple] = (1,)) -> Rotation:
+    def random(cls: type[Self], shape: Union[int, tuple] = (1,)) -> Self:
         """Return random rotations.
 
         Parameters
@@ -422,7 +422,7 @@ class Rotation(Quaternion):
         return super().random(shape)
 
     @classmethod
-    def identity(cls, shape: Union[int, tuple] = (1,)) -> Rotation:
+    def identity(cls: type[Self], shape: Union[int, tuple] = (1,)) -> Self:
         """Return identity rotations.
 
         Parameters
@@ -439,11 +439,11 @@ class Rotation(Quaternion):
 
     @classmethod
     def random_vonmises(
-        cls,
+        cls: type[Self],
         shape: Union[int, tuple] = (1,),
         alpha: float = 1.0,
         reference: Union[list, tuple, Rotation] = (1, 0, 0, 0),
-    ) -> Rotation:
+    ) -> Self:
         """Return random rotations with a simplified Von Mises-Fisher
         distribution.
 
@@ -477,14 +477,14 @@ class Rotation(Quaternion):
         return cls.stack(r[:n]).reshape(*shape)
 
     def unique(
-        self,
+        self: Self,
         return_index: bool = False,
         return_inverse: bool = False,
         antipodal: bool = True,
     ) -> Union[
-        Rotation,
-        Tuple[Rotation, np.ndarray],
-        Tuple[Rotation, np.ndarray, np.ndarray],
+        Self,
+        tuple[Self, np.ndarray],
+        tuple[Self, np.ndarray, np.ndarray],
     ]:
         """Return the unique rotations from these rotations.
 
@@ -616,12 +616,12 @@ class Rotation(Quaternion):
         return angles
 
     def outer(
-        self,
+        self: Self,
         other: Union[Rotation, Vector3d],
         lazy: bool = False,
         chunk_size: int = 20,
         progressbar: bool = True,
-    ) -> Union[Rotation, Vector3d]:
+    ) -> Union[Self, Rotation, Vector3d]:
         """Return the outer rotation products of the rotations and the
         other rotations or vectors.
 
@@ -666,7 +666,7 @@ class Rotation(Quaternion):
 
         return r
 
-    def flatten(self) -> Rotation:
+    def flatten(self: Self) -> Self:
         """Return a new rotation instance collapsed into one dimension.
 
         Returns

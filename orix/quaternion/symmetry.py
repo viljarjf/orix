@@ -18,14 +18,17 @@
 
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union, TypeVar
 
 from diffpy.structure.spacegroups import GetSpaceGroup
 import matplotlib.pyplot as plt
 import numpy as np
 
-from orix.quaternion.rotation import Rotation
-from orix.vector import AxAngle, Vector3d
+from orix.quaternion import Orientation, Rotation
+from orix.vector import AxAngle, Vector3d, FundamentalSector, SphericalRegion
+
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Symmetry")
 
 
 class Symmetry(Rotation):
@@ -62,7 +65,7 @@ class Symmetry(Rotation):
         generators = [g for g in self.subgroups if g in other.subgroups]
         return Symmetry.from_generators(*generators)
 
-    def __hash__(self) -> hash:
+    def __hash__(self) -> int:
         return hash(self.name.encode() + self.data.tobytes() + self.improper.tobytes())
 
     @property
@@ -76,19 +79,19 @@ class Symmetry(Rotation):
         return np.all(np.equal(self.improper, 0))
 
     @property
-    def subgroups(self) -> List[Symmetry]:
+    def subgroups(self: Self) -> list[Self]:
         """Return the list groups that are subgroups of this group."""
         return [g for g in _groups if g._tuples <= self._tuples]
 
     @property
-    def proper_subgroups(self) -> List[Symmetry]:
+    def proper_subgroups(self: Self) -> list[Self]:
         """Return the list of proper groups that are subgroups of this
         group.
         """
         return [g for g in self.subgroups if g.is_proper]
 
     @property
-    def proper_subgroup(self) -> Union[List[Symmetry], Symmetry]:
+    def proper_subgroup(self: Self) -> Union[list[Self], Symmetry]:
         """Return the largest proper group of this subgroup."""
         subgroups = self.proper_subgroups
         if len(subgroups) == 0:
@@ -125,7 +128,7 @@ class Symmetry(Rotation):
             return Vector3d.stack(diads).flatten()
 
     @property
-    def euler_fundamental_region(self) -> tuple:
+    def euler_fundamental_region(self) -> tuple[int, int, int]:
         r"""Return the fundamental Euler angle region of the proper
         subgroup.
 
@@ -190,14 +193,14 @@ class Symmetry(Rotation):
             return None
 
     @property
-    def _tuples(self) -> set:
+    def _tuples(self) -> set[tuple[np.ndarray, ...]]:
         """Return the differentiators of this group."""
         s = Rotation(self.flatten())
         tuples = set([tuple(d) for d in s._differentiators()])
         return tuples
 
     @property
-    def fundamental_sector(self) -> "orix.vector.FundamentalSector":
+    def fundamental_sector(self) -> FundamentalSector:
         """Return the fundamental sector describing the inverse pole
         figure given by the point group name.
 
@@ -397,7 +400,7 @@ class Symmetry(Rotation):
             size_new = generator.size
         return generator
 
-    def get_axis_orders(self) -> Dict[Vector3d, int]:
+    def get_axis_orders(self) -> dict[Vector3d, int]:
         s = self[self.angle > 0]
         if s.size == 0:
             return {}
@@ -406,7 +409,7 @@ class Symmetry(Rotation):
             for a, b in zip(*np.unique(s.axis.data, axis=0, return_counts=True))
         }
 
-    def get_highest_order_axis(self) -> Tuple[Vector3d, np.ndarray]:
+    def get_highest_order_axis(self) -> tuple[Vector3d, np.ndarray]:
         axis_orders = self.get_axis_orders()
         if len(axis_orders) == 0:
             return Vector3d.zvector(), np.infty
@@ -416,7 +419,7 @@ class Symmetry(Rotation):
         ).flatten()
         return axes, highest_order
 
-    def fundamental_zone(self) -> Vector3d:
+    def fundamental_zone(self) -> SphericalRegion:
         from orix.vector import AxAngle, SphericalRegion
 
         symmetry = self.antipodal
@@ -452,7 +455,7 @@ class Symmetry(Rotation):
 
     def plot(
         self,
-        orientation: "orix.quaternion.Orientation" = None,
+        orientation: Orientation = None,
         reproject_scatter_kwargs: Optional[dict] = None,
         **kwargs,
     ) -> plt.Figure:

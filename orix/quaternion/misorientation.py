@@ -19,7 +19,7 @@
 from __future__ import annotations
 
 from itertools import product as iproduct
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Union, TypeVar
 import warnings
 
 import dask.array as da
@@ -36,6 +36,8 @@ from orix.quaternion.rotation import Rotation
 from orix.quaternion.symmetry import C1, Symmetry, _get_unique_symmetry_elements
 from orix.vector import AxAngle, Miller, NeoEuler, Vector3d
 
+# TODO: Replace with typing.Self after python >=3.11, as per PEP 673
+Self = TypeVar("Self", bound="Misorientation")
 
 class Misorientation(Rotation):
     r"""Misorientation object.
@@ -59,14 +61,14 @@ class Misorientation(Rotation):
     def __init__(
         self,
         data: Union[np.ndarray, Misorientation, list, tuple],
-        symmetry: Optional[Tuple[Symmetry, Symmetry]] = None,
+        symmetry: Optional[tuple[Symmetry, Symmetry]] = None,
     ):
         super().__init__(data)
         if symmetry:
             self.symmetry = symmetry
 
     @property
-    def symmetry(self) -> Tuple[Symmetry, Symmetry]:
+    def symmetry(self) -> tuple[Symmetry, Symmetry]:
         """Return or set the crystal symmetries.
 
         Parameters
@@ -77,19 +79,19 @@ class Misorientation(Rotation):
         return self._symmetry
 
     @symmetry.setter
-    def symmetry(self, value: Union[List[Symmetry], Tuple[Symmetry, Symmetry]]):
+    def symmetry(self, value: Union[list[Symmetry], tuple[Symmetry, Symmetry]]):
         if not isinstance(value, (list, tuple)):
             raise TypeError("Value must be a 2-tuple of Symmetry objects.")
         if len(value) != 2 or not all(isinstance(s, Symmetry) for s in value):
             raise ValueError("Value must be a 2-tuple of Symmetry objects.")
         self._symmetry = tuple(value)
 
-    def __getitem__(self, key) -> Misorientation:
+    def __getitem__(self: Self, key) -> Self:
         mori = super().__getitem__(key)
         mori._symmetry = self._symmetry
         return mori
 
-    def __eq__(self, other):
+    def __eq__(self: Self, other: Self) -> bool:
         v1 = super().__eq__(other)
         if not v1:
             return v1
@@ -100,27 +102,27 @@ class Misorientation(Rotation):
                 v2.append(sym_s == sym_o)
             return all(v2)
 
-    def reshape(self, *shape) -> Misorientation:
+    def reshape(self: Self, *shape) -> Self:
         mori = super().reshape(*shape)
         mori._symmetry = self._symmetry
         return mori
 
-    def flatten(self) -> Misorientation:
+    def flatten(self: Self) -> Self:
         mori = super().flatten()
         mori._symmetry = self._symmetry
         return mori
 
-    def squeeze(self) -> Misorientation:
+    def squeeze(self: Self) -> Self:
         mori = super().squeeze()
         mori._symmetry = self._symmetry
         return mori
 
-    def transpose(self, *axes) -> Misorientation:
+    def transpose(self: Self, *axes) -> Self:
         mori = super().transpose(*axes)
         mori._symmetry = self._symmetry
         return mori
 
-    def equivalent(self, grain_exchange: bool = False) -> Misorientation:
+    def equivalent(self: Self, grain_exchange: bool = False) -> Self:
         r"""Return the equivalent misorientations.
 
         grain_exchange
@@ -142,7 +144,7 @@ class Misorientation(Rotation):
         equivalent = Gr.outer(misorientations.outer(Gl))
         return self.__class__(equivalent).flatten()
 
-    def map_into_symmetry_reduced_zone(self, verbose: bool = False) -> Misorientation:
+    def map_into_symmetry_reduced_zone(self: Self, verbose: bool = False) -> Self:
         """Return equivalent transformations which have the smallest
         angle of rotation as a new misorientation.
 
@@ -184,7 +186,7 @@ class Misorientation(Rotation):
         o_inside._symmetry = (Gl, Gr)
         return o_inside
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation."""
         cls = self.__class__.__name__
         shape = str(self.shape)
@@ -199,7 +201,7 @@ class Misorientation(Rotation):
         self,
         projection: str = "axangle",
         figure: Optional[plt.Figure] = None,
-        position: Union[int, Tuple[int, int], SubplotSpec] = None,
+        position: Union[int, tuple[int, int], SubplotSpec] = None,
         return_figure: bool = False,
         wireframe_kwargs: Optional[dict] = None,
         size: Optional[int] = None,
@@ -390,17 +392,17 @@ class Misorientation(Rotation):
 
     @classmethod
     def from_align_vectors(
-        cls,
+        cls: type[Self],
         other: Miller,
         initial: Miller,
         weights: Optional[np.ndarray] = None,
         return_rmsd: bool = False,
         return_sensitivity: bool = False,
     ) -> Union[
-        Misorientation,
-        Tuple[Misorientation, float],
-        Tuple[Misorientation, np.ndarray],
-        Tuple[Misorientation, float, np.ndarray],
+        Self,
+        tuple[Self, float],
+        tuple[Self, np.ndarray],
+        tuple[Self, float, np.ndarray],
     ]:
         """Return an estimated misorientation to optimally align two
         sets of vectors, one set in each crystal.
@@ -479,10 +481,10 @@ class Misorientation(Rotation):
 
     @classmethod
     def from_scipy_rotation(
-        cls,
+        cls: type[Self],
         rotation: SciPyRotation,
-        symmetry: Optional[Tuple[Symmetry, Symmetry]] = None,
-    ) -> Misorientation:
+        symmetry: Optional[tuple[Symmetry, Symmetry]] = None,
+    ) -> Self:
         """Return misorientations(s) from
         :class:`scipy.spatial.transform.Rotation`.
 
