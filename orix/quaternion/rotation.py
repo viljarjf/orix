@@ -20,16 +20,16 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional, Union, TypeVar
+from typing import Any, Optional, TypeVar, Union
 
 import dask.array as da
-from dask.diagnostics import ProgressBar
 import numpy as np
+from dask.diagnostics import ProgressBar
 from scipy.spatial.transform import Rotation as SciPyRotation
 from scipy.special import hyp0f1
 
 from orix.quaternion import Quaternion
-from orix.vector import Vector3d, NeoEuler
+from orix.vector import NeoEuler, Vector3d
 
 # Used to round values below 1e-16 to zero
 _FLOAT_EPS = np.finfo(float).eps
@@ -481,11 +481,7 @@ class Rotation(Quaternion):
         return_index: bool = False,
         return_inverse: bool = False,
         antipodal: bool = True,
-    ) -> Union[
-        Self,
-        tuple[Self, np.ndarray],
-        tuple[Self, np.ndarray, np.ndarray],
-    ]:
+    ) -> Union[Self, tuple[Self, np.ndarray], tuple[Self, np.ndarray, np.ndarray],]:
         """Return the unique rotations from these rotations.
 
         Two rotations are not unique if they have the same propriety

@@ -18,18 +18,18 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TypeVar
 import warnings
+from typing import Optional, TypeVar, Union
 
 import dask.array as da
-from dask.diagnostics import ProgressBar
 import numpy as np
 import quaternion
+from dask.diagnostics import ProgressBar
 from scipy.spatial.transform import Rotation as SciPyRotation
 
 from orix._util import deprecated_argument
 from orix.base import Object3d
-from orix.vector import AxAngle, Miller, Vector3d, NeoEuler
+from orix.vector import AxAngle, Miller, NeoEuler, Vector3d
 
 # Used to round values below 1e-16 to zero
 _FLOAT_EPS = np.finfo(float).eps
@@ -182,7 +182,9 @@ class Quaternion(Object3d):
         return self.__class__(-self.data)
 
     @classmethod
-    def triple_cross(cls: type[Self], q1: Quaternion, q2: Quaternion, q3: Quaternion) -> Self:
+    def triple_cross(
+        cls: type[Self], q1: Quaternion, q2: Quaternion, q3: Quaternion
+    ) -> Self:
         """Pointwise cross product of three quaternions.
 
         Parameters

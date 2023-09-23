@@ -51,6 +51,7 @@ _EPSILON = 1e-9  # small number to avoid round off problems
 # TODO: Replace with typing.Self after python >=3.11, as per PEP 673
 Self = TypeVar("Self", bound="OrientationRegion")
 
+
 def _get_large_cell_normals(s1: Symmetry, s2: Symmetry) -> Rotation:
     dp = get_distinguished_points(s1, s2)
     normals = Rodrigues.zero(dp.shape + (2,))

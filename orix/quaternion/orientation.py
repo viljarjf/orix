@@ -18,23 +18,24 @@
 
 from __future__ import annotations
 
-from itertools import product as iproduct
-from typing import Optional, Union, TypeVar
 import warnings
+from itertools import product as iproduct
+from typing import Optional, TypeVar, Union
 
 import dask.array as da
+import matplotlib.pyplot as plt
+import numpy as np
 from dask.diagnostics import ProgressBar
 from diffpy.structure import Structure
 from matplotlib.gridspec import SubplotSpec
-import matplotlib.pyplot as plt
-import numpy as np
 from scipy.spatial.transform import Rotation as SciPyRotation
 from tqdm import tqdm
 
 from orix.quaternion.misorientation import Misorientation
 from orix.quaternion.orientation_region import OrientationRegion
 from orix.quaternion.rotation import Rotation
-from orix.quaternion.symmetry import C1, Symmetry, _get_unique_symmetry_elements
+from orix.quaternion.symmetry import (C1, Symmetry,
+                                      _get_unique_symmetry_elements)
 from orix.vector import AxAngle, Miller, NeoEuler, Vector3d
 
 # TODO: Replace with typing.Self after python >=3.11, as per PEP 673
@@ -794,9 +795,8 @@ class Orientation(Misorientation):
                 **kwargs,
             )
         else:
-            from orix.plot.inverse_pole_figure_plot import (
-                _setup_inverse_pole_figure_plot,
-            )
+            from orix.plot.inverse_pole_figure_plot import \
+                _setup_inverse_pole_figure_plot
 
             if figure is None:
                 # Determine which hemisphere(s) to show

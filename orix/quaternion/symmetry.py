@@ -18,14 +18,14 @@
 
 from __future__ import annotations
 
-from typing import Optional, Union, TypeVar
+from typing import Optional, TypeVar, Union
 
-from diffpy.structure.spacegroups import GetSpaceGroup
 import matplotlib.pyplot as plt
 import numpy as np
+from diffpy.structure.spacegroups import GetSpaceGroup
 
 from orix.quaternion import Orientation, Rotation
-from orix.vector import AxAngle, Vector3d, FundamentalSector, SphericalRegion
+from orix.vector import AxAngle, FundamentalSector, SphericalRegion, Vector3d
 
 # TODO: Replace with typing.Self after python >=3.11, as per PEP 673
 Self = TypeVar("Self", bound="Symmetry")
