@@ -18,17 +18,20 @@
 
 from __future__ import annotations
 
-from typing import Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Optional, TypeVar, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 from diffpy.structure.spacegroups import GetSpaceGroup
 
-from orix.quaternion import Orientation, Rotation
+from orix.quaternion.rotation import Rotation
 from orix.vector import AxAngle, FundamentalSector, SphericalRegion, Vector3d
 
 # TODO: Replace with typing.Self after python >=3.11, as per PEP 673
 Self = TypeVar("Self", bound="Symmetry")
+
+if TYPE_CHECKING:
+    from orix.quaternion import Orientation
 
 
 class Symmetry(Rotation):
