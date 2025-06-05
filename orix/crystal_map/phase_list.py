@@ -21,7 +21,7 @@ from collections import OrderedDict
 import copy
 from itertools import islice
 from pathlib import Path
-from typing import Generator
+from typing import Generator, TypeVar
 import warnings
 
 from diffpy.structure import Lattice, Structure
@@ -45,6 +45,8 @@ for k, v in {**mcolors.BASE_COLORS, **mcolors.CSS4_COLORS}.items():
     ALL_COLORS[k] = mcolors.to_hex(v)
 ALL_COLORS.update(mcolors.XKCD_COLORS)
 
+
+Self = TypeVar("Self", bound="Phase")
 
 class Phase:
     """Name, symmetry, and color of a phase in a crystallographic map.
@@ -333,7 +335,7 @@ class Phase:
         )
 
     @classmethod
-    def from_cif(cls, filename: str | Path) -> Phase:
+    def from_cif(cls: type[Self], filename: str | Path) -> Self:
         """Return a new phase from a CIF file using
         :mod:`diffpy.structure`'s CIF file parser.
 
@@ -359,13 +361,13 @@ class Phase:
             warnings.warn(f"Could not read space group from CIF file {path!r}")
         return cls(name, space_group, structure=structure)
 
-    def deepcopy(self) -> Phase:
+    def deepcopy(self) -> Self:
         """Return a deep copy using :py:func:`~copy.deepcopy`
         function.
         """
         return copy.deepcopy(self)
 
-    def expand_asymmetric_unit(self) -> Phase:
+    def expand_asymmetric_unit(self) -> Self:
         """Return new instance with all symmetrically equivalent atoms.
 
         Examples
@@ -414,7 +416,7 @@ class Phase:
                     diffpy_structure.append(new_atom)
 
         # This handles conversion back to correct alignment
-        out = Phase(self)
+        out = self.__class__(self)
         out.structure = diffpy_structure
         return out
 

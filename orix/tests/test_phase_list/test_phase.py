@@ -422,6 +422,37 @@ class TestPhase:
         assert np.allclose(phase1.structure.lattice.base, phase2.structure.lattice.base)
         assert np.allclose(phase1.structure.xyz, phase2.structure.xyz)
 
+    def test_inheritance(self, cif_file):
+        """Check factory methods for correct types"""
+        class SubPhase(Phase):
+            pass
+
+        p1 = SubPhase(
+            "test",
+            225,
+            "m-3m",
+            Structure(
+                [Atom("Al", (0, 0, 0))],
+                Lattice(10, 10, 10, 90, 90, 90),
+            ),
+        )
+
+        # Copy constructor
+        p2 = SubPhase(p1)
+        assert isinstance(p2, SubPhase)
+
+        # Deepcopy
+        p3 = p1.deepcopy()
+        assert isinstance(p3, SubPhase)
+
+        # From cif
+        p4 = SubPhase.from_cif(cif_file)
+        assert isinstance(p4, SubPhase)
+
+        # expand_asymmetric_unit
+        p5 = p1.expand_asymmetric_unit()
+        assert isinstance(p5, SubPhase)
+
     @pytest.mark.parametrize(
         ["lattice", "atoms", "spacegroup", "expected_atom_positions"],
         [
