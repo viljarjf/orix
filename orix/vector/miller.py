@@ -759,7 +759,7 @@ class Miller(Vector3d):
         return m
 
     def unique(
-        self, use_symmetry: bool = False, return_index: bool = False
+        self, use_symmetry: bool = False, return_index: bool = False, return_inverse: bool = False,
     ) -> Miller | tuple[Miller, np.ndarray]:
         """Unique vectors in ``self``.
 
@@ -779,11 +779,20 @@ class Miller(Vector3d):
         idx
             Indices of the unique data in the (flattened) array.
         """
-        out = super().unique(return_index=return_index)
-        if return_index:
+        out = super().unique(
+            return_index=return_index, 
+            return_inverse=return_inverse, 
+            ignore_zero=False,
+        )
+        if return_index and return_inverse:
+            v, idx, inv = out
+        elif return_index:
             v, idx = out
+        elif return_inverse:
+            v, inv = out
         else:
             v = out
+
 
         if use_symmetry:
             operations = self.phase.point_group
@@ -795,13 +804,23 @@ class Miller(Vector3d):
                 a = data[i]
                 order = np.lexsort(a.T)  # Sort by column 1, 2, then 3
                 data_sorted[i] = a[order]
-            _, idx = np.unique(data_sorted, return_index=True, axis=0)
-            v = v[idx[::-1]]
+            _, _idx, _inv = np.unique(data_sorted, return_index=True, return_inverse=True, axis=0)
+            order = np.argsort(_idx)
+            inv_order = np.argsort(order)
+            v = v[_idx[order]]
+            if return_index:
+                idx = idx[_idx[order]]
+            if return_inverse:
+                inv = inv_order[_inv][inv]
 
         m = self.__class__(xyz=v.data, phase=self.phase)
         m.coordinate_format = self.coordinate_format
-        if return_index:
+        if return_index and return_inverse:
+            return m, idx, inv
+        elif return_index:
             return m, idx
+        elif return_inverse:
+            return m, inv
         else:
             return m
 

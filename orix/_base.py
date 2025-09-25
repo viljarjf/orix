@@ -250,14 +250,18 @@ class Object3d:
         data = self.flatten()._data.round(10)
         if ignore_zero:
             data = data[~np.all(np.isclose(data, 0), axis=1)]  # Remove zeros
-        _, idx, inv = np.unique(data, axis=0, return_index=True, return_inverse=True)
-        obj = self.__class__(data[np.sort(idx), : self.dim])
-        obj._data = data[np.sort(idx)]
+        _, idx, inv = np.unique(data, axis=0, return_index=True, return_inverse=True, sorted=False)
+        order = np.argsort(idx)
+        inv_order = np.argsort(order)
+        idx = idx[order]
+        inv = inv_order[inv]
+        obj = self.__class__(data[idx, : self.dim])
+        obj._data = data[idx]
         if return_index and return_inverse:
             return obj, idx, inv
-        elif return_index and not return_inverse:
+        elif return_index:
             return obj, idx
-        elif return_inverse and not return_index:
+        elif return_inverse:
             return obj, inv
         else:
             return obj

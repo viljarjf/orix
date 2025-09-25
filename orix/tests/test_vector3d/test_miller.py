@@ -239,7 +239,7 @@ class TestMiller:
         m3, idx = m2.unit.unique(return_index=True)
         assert m3.size == 205
         assert isinstance(m3, Miller)
-        assert np.allclose(idx[:10], [65, 283, 278, 269, 255, 235, 208, 282, 272, 276])
+        assert np.allclose(idx[:10], list(range(10)))
 
     def test_multiply_orientation(self):
         o = Orientation.from_euler(np.deg2rad([45, 0, 0]))
